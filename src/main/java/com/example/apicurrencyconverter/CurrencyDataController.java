@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "https://valeriot.z16.web.core.windows.net/"})
 public class CurrencyDataController {
 
     @Value("${EXCHANGE_RATES_API_KEY:defaultApiKey}")

@@ -60,4 +60,7 @@ jobs:
           app-name: 'apicurrencyconverter'
           slot-name: 'Production'
           package: '*.jar'
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          EXCHANGE_RATES_API_KEY: ${{ secrets.EXCHANGE_RATES_API_KEY }}
           

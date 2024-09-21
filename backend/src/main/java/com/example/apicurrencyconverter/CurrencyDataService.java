@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class CurrencyDataService {
 
-    @Value("${EXCHANGE_RATES_API_KEY:defaultApiKey}")
+    @Value("${EXCHANGE_RATES_API_KEY}")
     private String apiKey;
 
     private static final String BASE_URL = "http://api.exchangeratesapi.io/v1/";

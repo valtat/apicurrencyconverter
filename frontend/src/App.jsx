@@ -17,7 +17,6 @@ function App() {
   const [exchangeRate, setExchangeRate] = useState(1);
 
   const {
-    currencies,
     timestamp,
     currencyOptions,
     fromCurrency,
@@ -52,12 +51,24 @@ function App() {
   }
 
   function handleFromAmountChange(e) {
-    setAmount(e.target.value);
+    const newValue = e.target.value.replace(/[^0-9.]/g, "");
+
+    if (newValue === '' || !/^\d+(\.\d+)?$/.test(newValue)) {
+      return;
+    }
+
+    setAmount(newValue);
     setAmountInFromCurrency(true);
   }
 
   function handleToAmountChange(e) {
-    setAmount(e.target.value);
+    const newValue = e.target.value.replace(/[^0-9.]/g, "");
+
+    if (newValue === '' || !/^\d+(\.\d+)?$/.test(newValue)) {
+      return;
+    }
+
+    setAmount(newValue);
     setAmountInFromCurrency(false);
   }
 

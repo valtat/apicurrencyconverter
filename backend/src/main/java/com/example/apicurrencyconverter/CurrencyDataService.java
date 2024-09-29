@@ -1,13 +1,14 @@
 package com.example.apicurrencyconverter;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 public class CurrencyDataService {
@@ -17,49 +18,61 @@ public class CurrencyDataService {
 
     private static final String BASE_URL = "http://api.exchangeratesapi.io/v1/";
 
-    private final CurrencyDataRepository repository;
+    private final DatabaseService databaseService;
 
-    public CurrencyDataService(CurrencyDataRepository repository) {
-        this.repository = repository;
+    @Autowired
+    public CurrencyDataService(DatabaseService databaseService) {
+        this.databaseService = databaseService;
     }
 
     @PostConstruct
     public void init() {
-        if (repository.count() == 0) {
+        if (databaseService.getCurrencyDataEntityCount() == 0) {
             fetchAndStoreCurrencyData();
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Run once a day at midnight
+    @Scheduled(cron = "0 0 0 * * ?")
     public void fetchAndStoreCurrencyData() {
         String endpoint = "latest";
         String url = BASE_URL + endpoint + "?access_key=" + apiKey;
         RestTemplate restTemplate = new RestTemplate();
         CurrencyData currencyData = restTemplate.getForObject(url, CurrencyData.class);
         if (currencyData != null) {
-            repository.save(currencyData);
+            databaseService.saveCurrencyData(currencyData);
         }
     }
 
-    public CurrencyData getLatestCurrencyData() {
-        return repository.findTopByOrderByTimestampDesc();
+    double calculateConversion(String baseCurrency, double amount, String fromCurrency, String toCurrency,
+            double fromCurrencyRate, double toCurrencyRate) {
+
+        BigDecimal result;
+
+        if (fromCurrency.equals(baseCurrency)) {
+            result = BigDecimal.valueOf(amount * toCurrencyRate);
+            return result.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        }
+
+        if (toCurrency.equals(baseCurrency)) {
+            result = BigDecimal.valueOf(amount / fromCurrencyRate);
+            return result.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        }
+
+        result = BigDecimal.valueOf(amount * (toCurrencyRate / fromCurrencyRate));
+        return result.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     public double convertCurrency(double amount, String fromCurrency, String toCurrency) {
-        CurrencyData latestData = getLatestCurrencyData();
-        Map<String, Double> rates = latestData.getRates();
-        String baseCurrency = latestData.getBase();
+        CurrencyData data = databaseService.getLatestCurrencyData();
+        String baseCurrency = data.getBase();
+        Double fromCurrencyRate = data.getRates().get(fromCurrency);
+        Double toCurrencyRate = data.getRates().get(toCurrency);
 
-        if (rates.containsKey(fromCurrency) && rates.containsKey(toCurrency)) {
-            if (fromCurrency.equals(baseCurrency)) {
-                return amount * rates.get(toCurrency);
-            } else if (toCurrency.equals(baseCurrency)) {
-                return amount / rates.get(fromCurrency);
-            } else {
-                return amount * (rates.get(toCurrency) / rates.get(fromCurrency));
-            }
-        } else {
+        if (fromCurrencyRate == null || toCurrencyRate == null) {
             throw new IllegalArgumentException("Invalid currency code");
         }
+
+        return calculateConversion(baseCurrency, amount, fromCurrency, toCurrency, fromCurrencyRate,
+                toCurrencyRate);
     }
 }

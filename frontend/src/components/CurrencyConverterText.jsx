@@ -4,10 +4,6 @@ export default function CurrencyConverterText({}) {
   return (
     <>
       <h1>Currency Converter</h1>
-      <p>
-        Convert currencies easily by choosing the starting currency (default is
-        EUR) and the destination currency.
-      </p>
     </>
   );
 }

@@ -6,18 +6,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "https://valeriot.z16.web.core.windows.net/"})
+@CrossOrigin(origins = { "http://localhost:5173", "https://valeriot.z16.web.core.windows.net/" })
 public class CurrencyDataController {
 
     private final CurrencyDataService currencyDataService;
+    private final DatabaseService databaseService;
 
-    public CurrencyDataController(CurrencyDataService currencyDataService) {
+    public CurrencyDataController(CurrencyDataService currencyDataService, DatabaseService databaseService) {
         this.currencyDataService = currencyDataService;
+        this.databaseService = databaseService;
     }
 
     @GetMapping("/api/currency")
     public CurrencyData getCurrencyData() {
-        return currencyDataService.getLatestCurrencyData();
+        return databaseService.getLatestCurrencyData();
     }
 
     @GetMapping("/api/change-currency")

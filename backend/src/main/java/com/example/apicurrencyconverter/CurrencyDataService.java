@@ -13,21 +13,27 @@ import java.math.RoundingMode;
 @Service
 public class CurrencyDataService {
 
-    @Value("${EXCHANGE_RATES_API_KEY}")
+    @Value("${EXCHANGE_RATES_API_KEY:default-api-key}")
     private String apiKey;
 
     private static final String BASE_URL = "http://api.exchangeratesapi.io/v1/";
 
     private final DatabaseService databaseService;
+    private final boolean initEnabled;
 
     @Autowired
     public CurrencyDataService(DatabaseService databaseService) {
+        this(databaseService, true);
+    }
+
+    public CurrencyDataService(DatabaseService databaseService, boolean initEnabled) {
         this.databaseService = databaseService;
+        this.initEnabled = initEnabled;
     }
 
     @PostConstruct
     public void init() {
-        if (databaseService.getCurrencyDataEntityCount() == 0) {
+        if (initEnabled && databaseService.getCurrencyDataEntityCount() == 0) {
             fetchAndStoreCurrencyData();
         }
     }

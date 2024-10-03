@@ -1,5 +1,6 @@
 package com.example.apicurrencyconverter;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import java.util.HashMap;
@@ -34,6 +35,11 @@ public class CurrencyDataServiceUnitTest {
     @MockBean
     private DatabaseService databaseService;
 
+    @BeforeEach
+    public void setUp() {
+        currencyDataService = new CurrencyDataService(databaseService, false);
+    }
+
     @Test
     public void testConvertCurrency() {
         CurrencyData currencyData = new CurrencyData();
@@ -46,6 +52,7 @@ public class CurrencyDataServiceUnitTest {
             }
         });
 
+        when(databaseService.getCurrencyDataEntityCount()).thenReturn(5L);
         when(databaseService.getLatestCurrencyData()).thenReturn(currencyData);
 
         double result = currencyDataService.convertCurrency(100, "EUR", "USD");

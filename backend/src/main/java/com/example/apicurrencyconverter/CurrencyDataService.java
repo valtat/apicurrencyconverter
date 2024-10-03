@@ -21,12 +21,12 @@ public class CurrencyDataService {
     private final DatabaseService databaseService;
     private final boolean initEnabled;
 
-    @Autowired
     public CurrencyDataService(DatabaseService databaseService) {
         this(databaseService, true);
     }
 
-    public CurrencyDataService(DatabaseService databaseService, boolean initEnabled) {
+    @Autowired
+    public CurrencyDataService(DatabaseService databaseService, @Value("${init.enabled:true}") boolean initEnabled) {
         this.databaseService = databaseService;
         this.initEnabled = initEnabled;
     }

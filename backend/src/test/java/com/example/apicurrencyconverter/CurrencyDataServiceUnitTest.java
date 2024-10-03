@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import java.util.HashMap;
 
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,9 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = ApicurrencyconverterApplication.class)
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {
+        "init.enabled=false"
+})
 
 public class CurrencyDataServiceUnitTest {
 
@@ -37,7 +41,6 @@ public class CurrencyDataServiceUnitTest {
 
     @BeforeEach
     public void setUp() {
-        currencyDataService = new CurrencyDataService(databaseService, false);
     }
 
     @Test

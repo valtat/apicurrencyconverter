@@ -1,40 +1,40 @@
-import { useState, useEffect } from "react";
-
-function calculateExchangeRate(currencies, fromCurrency, toCurrency) {
-  if (!currencies || !currencies.rates) {
-    return;
-  }
-  if (fromCurrency === currencies.base) {
-    return currencies.rates[toCurrency];
-  } else if (toCurrency === currencies.base) {
-    return 1 / currencies.rates[fromCurrency];
-  } else {
-    return currencies.rates[toCurrency] / currencies.rates[fromCurrency];
-  }
-}
+import { useState } from "react";
 
 const useCurrencyConverter = (
-  currencies,
   fromCurrency,
   toCurrency,
-  initialRate
+  CONVERT_URL,
+  amount
 ) => {
-  const [exchangeRate, setRate] = useState(initialRate);
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  const [conversionAmount, setConversionAmount] = useState(null);
+  const [conversionFromCurrency, setConversionFromCurrency] = useState(null);
+  const [conversionToCurrency, setConversionToCurrency] = useState(null);
 
-  useEffect(() => {
-    if (fromCurrency != null && toCurrency != null && currencies != null) {
-      const calculatedRate = calculateExchangeRate(
-        currencies,
-        fromCurrency,
-        toCurrency
-      );
-      if (calculatedRate !== exchangeRate) {
-        setRate(calculatedRate);
-      }
+  const handleConvert = () => {
+    if (amount && fromCurrency && toCurrency) {
+      const url = `${CONVERT_URL}?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          setConvertedAmount(data);
+        })
+        .catch((error) => console.error("Error converting currency:", error));
+      setConversionAmount(amount);
+      setConversionFromCurrency(fromCurrency);
+      setConversionToCurrency(toCurrency);
+    } else {
+      console.error("Amount, fromCurrency, and toCurrency must be provided");
     }
-  }, [fromCurrency, toCurrency, currencies, exchangeRate]);
+  };
 
-  return { exchangeRate, calculateExchangeRate };
+  return {
+    handleConvert,
+    convertedAmount,
+    conversionAmount,
+    conversionFromCurrency,
+    conversionToCurrency,
+  };
 };
 
 export default useCurrencyConverter;

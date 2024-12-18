@@ -31,8 +31,6 @@ Feel free to copy the repository and try it out locally. Things to keep in mind:
   },
 - Run the backend server locally by starting ApicurrencyconverterApplication.java
 
-
-
 Example application.resources:
 
     spring.data.mongodb.uri=your_mongodb_uri

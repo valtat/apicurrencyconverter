@@ -3,12 +3,13 @@ import React from "react";
 export default function TimeStamp({ timestamp }) {
   return (
     <>
-      <label className="timestamp">
-        Currencies updated on:{" "}
-        {timestamp
-          ? new Date(timestamp * 1000).toLocaleString()
-          : "Waiting for data..."}
-      </label>
+      {timestamp ? (
+        <label className="timestamp">
+          Currencies updated on: {new Date(timestamp * 1000).toLocaleString()}
+        </label>
+      ) : (
+        <label className="timestamp">Loading data. Please be patient. You may need to refresh the page.</label>
+      )}
     </>
   );
 }

@@ -1,43 +1,62 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - main
 
-pool:
-  vmImage: ubuntu-latest
-
 variables:
-  azureSubscription: '4b62f712-a05d-4004-916b-73432999b6ac' 
-  staticWebAppName: 'apicurrencyconverterfrontend'      
-  appArtifactLocation: 'build'  
-  playwrightTestLocation: 'frontend/tests'
+  azureSubscription: $(azure_subcription)
+  webAppName: 'apicurrencyconverterbackend'
+  environmentName: 'production'
+  vmImageName: 'ubuntu-latest'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: MavenPackageAndPublishArtifacts
+    displayName: Maven Package and Publish Artifacts
+    pool:
+      vmImage: $(vmImageName)
 
-- script: |
-    npm install
-  displayName: 'Install dependencies'
+    steps:
+    - task: Maven@4
+      displayName: 'Maven Package'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        mavenOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.17' 
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: true
+        testResultsFiles: 'backend/**/surefire-reports/TEST-*.xml'
+        goals: 'clean package'
 
-- script: |
-    npx playwright install  # Installs the necessary browser binaries for Playwright
-    npx playwright test $(playwrightTestLocation)  # Run Playwright tests
-  displayName: 'Run Playwright tests'
+    - task: CopyFiles@2
+      displayName: 'Copy Files to artifact staging directory'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/backend'
+        Contents: '**/target/*.?(war|jar)'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
 
-- script: |
-    npm run build
-  displayName: 'npm run build'
+    - upload: $(Build.ArtifactStagingDirectory)
+      artifact: drop
 
-- task: AzureStaticWebApp@0
-  inputs:
-    azureSubscription: '4b62f712-a05d-4004-916b-73432999b6ac'
-    app_location: '/'
-    api_location: ''
-    app_artifact_location: $(Build.ArtifactStagingDirectory)/$(appArtifactLocation)
-    deployment_token: $(deployment_token)  # You can get this token from the Azure portal
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployLinuxWebApp
+    displayName: Deploy Linux Web App
+    environment: $(environmentName)
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Azure Web App Deploy: $(webAppName)'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: webAppLinux
+              appName: $(webAppName)
+              package: '$(Pipeline.Workspace)/drop/**/target/*.?(war|jar)'

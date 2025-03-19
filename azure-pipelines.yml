@@ -41,11 +41,15 @@ stages:
         publishJUnitResults: true
         testResultsFiles: 'backend**/surefire-reports/TEST-*.xml'
         goals: 'clean package'
-        
-    - task: PublishCodeCoverageResults@1
+    - task: Maven@4
+      displayName: 'Maven - Generate Coverage Report'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'clean verify'
+        options: '-DskipTests=false'
+    - task: PublishCodeCoverageResults@2
       displayName: 'Publish Code Coverage Results'
       inputs:
-        codeCoverageTool: 'JaCoCo'
         summaryFileLocation: 'backend/target/site/jacoco/jacoco.xml'
 
     - task: CopyFiles@2

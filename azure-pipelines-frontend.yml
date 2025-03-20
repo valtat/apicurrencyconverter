@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+    - azure-pipelines
+  paths:
+    include:
+    - frontend/*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  staticWebAppName: 'apicurrencyconverterfrontend'
+  appArtifactLocation: 'dist'
+  playwrightTestLocation: 'frontend/tests'
+
+steps:
+# Step 1: Install Node.js
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
+
+# Step 2: Install dependencies
+- script: |
+    npm install
+  displayName: 'Install dependencies'
+
+# Step 3: Run Playwright tests
+- script: |
+    npx playwright install  # Installs the necessary browser binaries for Playwright
+    npx playwright test $(playwrightTestLocation)  # Run Playwright tests
+  displayName: 'Run Playwright tests'
+
+# Step 4: Build React app
+- script: |
+    npm run build
+  displayName: 'npm run build'
+
+# Step 5: Deploy to Azure Static Web App
+- task: AzureStaticWebApp@0
+  inputs:
+    app_location: '/'
+    api_location: ''
+    app_artifact_location: $(Build.ArtifactStagingDirectory)/$(appArtifactLocation)
+    deployment_token: $(deployment_token)

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:5173", "https://valeriot.z16.web.core.windows.net/" })
+@CrossOrigin(origins = { "http://localhost:5173", "https://valeriot.z16.web.core.windows.net/", "https://kind-island-02bf6e003.6.azurestaticapps.net/" })
 public class CurrencyDataController {
 
     private final CurrencyDataService currencyDataService;

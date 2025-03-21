@@ -7,11 +7,8 @@ import useFetch from "./hooks/useFetch.jsx";
 import useCurrencyConverter from "./hooks/useCurrencyConverter";
 import ResultText from "./components/ResultText.jsx";
 
-const BASE_URL = "http://localhost:8080/api/currency";
-const CONVERT_URL = "http://localhost:8080/api/change-currency";
-
-//"https://apicurrencyconverter-hndhcrcaczayhudr.northeurope-01.azurewebsites.net/api/currency"
-//"https://apicurrencyconverter-hndhcrcaczayhudr.northeurope-01.azurewebsites.net/api/change-currency"
+const BASE_URL = "https://apicurrencyconverterbackend-ehgzhwhbetc3ghhq.northeurope-01.azurewebsites.net/api/currency";
+const CONVERT_URL = "https://apicurrencyconverterbackend-ehgzhwhbetc3ghhq.northeurope-01.azurewebsites.net/api/change-currency";
 
 function App() {
   const {
